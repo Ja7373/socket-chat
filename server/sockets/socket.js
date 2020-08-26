@@ -21,6 +21,7 @@ io.on('connection', (client) => {
         let personas = usuarios.agregarPersona(client.id, data.nombre, data.sala);
         // console.log('personas:', personas);
         client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasPorSala(data.sala));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${data.nombre} Ha entrado el chat`));
 
         callback(usuarios.getPersonasPorSala(data.sala));
 
@@ -28,14 +29,19 @@ io.on('connection', (client) => {
 
     });
 
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id); // Usuarios.getPersona(client.id);
         console.log('Persona desconectada: ', persona);
         //console.log('crearMensaje-data:', data);
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
         //console.log('Socket CrearMensaje:', data);
+        console.log('CrearMensaje-Server:', mensaje);
+        console.log('DatosPersona', persona);
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+        callback(mensaje);
+
     });
 
     client.on('disconnect', () => {
